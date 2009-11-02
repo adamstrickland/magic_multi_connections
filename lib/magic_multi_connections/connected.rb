@@ -9,7 +9,7 @@ module MagicMultiConnection::Connected
   
       def namespace_reflections_mirror_db=(value)
         if value
-          warn "DEPRACATION WARNING: Automatic namespace associations will be removed in the next major release of this gem. Please use explicit association statments."
+          warn "DEPRECATION WARNING: Automatic namespace associations will be removed in the next major release of this gem. Please use explicit association statments."
         end
         @namespace_reflections_mirror_db = value
       end
