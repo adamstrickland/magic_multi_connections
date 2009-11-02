@@ -2,36 +2,20 @@ module MagicMultiConnection::Connected
   def self.included(base)
     base.instance_eval do
       alias :pre_connected_const_missing :const_missing
-      mattr_accessor :connection_klass
-
+      
       def namespace_reflections_mirror_db
         @namespace_reflections_mirror_db
       end
   
       def namespace_reflections_mirror_db=(value)
-        # TODO Need to re-evaluate what is the best way to proceed with this namespacing issues.
-#        if value
-#          warn "DEPRACATION WARNING: Automatic namespace associations will be removed in the next major release of this gem. Please use explicit association statments."
-#        end
+        if value
+          warn "DEPRACATION WARNING: Automatic namespace associations will be removed in the next major release of this gem. Please use explicit association statments."
+        end
         @namespace_reflections_mirror_db = value
       end
-
-      if MagicMultiConnection.using_connection_pool?
-        def self.get_connection_klass(ar_model)
-          return self.connection_klass if self.connection_klass
-
-          # This is the first time so we have to establish the connection
-          ar_model.establish_connection self.connection_spec
-          self.connection_klass = ar_model
-        end
-      end
-
+  
       def const_missing(const_id)
-        # Check for constant and verify that its not an ActiveRecord Object
-        const = pre_connected_const_missing(const_id) rescue nil
-        return const if const && !const.is_a?(ActiveRecord::Base)
-
-
+        # return pre_connected_const_missing(const_id) rescue nil
         target_class = "#{self.parent_module}::#{const_id}".constantize rescue nil
         raise NameError.new("uninitialized constant #{const_id}") unless target_class
         
@@ -47,13 +31,8 @@ module MagicMultiConnection::Connected
           def self.mmc_owner
             @@mmc_owner
           end
-        end
-
-
-        unless MagicMultiConnection.using_connection_pool?   
-          klass.establish_connection self.connection_spec
-        end
-
+        end        
+        klass.establish_connection self.connection_spec
         klass
       end
 
@@ -102,15 +81,10 @@ module MagicMultiConnection::Connected
     end
     base.extend(ClassMethods)
   end
-
-
-
+  
   module ClassMethods
-
     def establish_connection_on(klass)
       klass.establish_connection self.connection_spec
     end
-    
   end
 end
-
