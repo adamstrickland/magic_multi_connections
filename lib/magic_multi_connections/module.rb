@@ -17,7 +17,7 @@ class Module
   private 
   def update_active_records
     self.constants.each do |c_str|
-      c = "#{self.name}::#{c_str}".constantize
+      c = self.const_get(c_str)
       next unless c.is_a? Class
       next unless c.new.is_a? ActiveRecord::Base
       c.establish_connection connection_spec
